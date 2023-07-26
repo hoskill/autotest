@@ -82,6 +82,7 @@ def get_links_by_page() -> None:
         for employee in data:
             link = employee.get_attribute('href')
             profile_links.append(link)
+        time.sleep(2)
         print('Ссылки с данной страницы успешно собраны...')
     except Exception as e:
         print(f'Произошла ошибка во время сбора ссылок... {e}')
@@ -93,6 +94,23 @@ def get_all_links(background_mode: bool = False, university: str = "ТГПУ", t
     """Сбор ссылок всех сотрудников из библиотеки"""
     connect(background_mode)
     get_employee(university, town)
+    next_page = driver.find_element(By.CSS_SELECTOR, '#pages > table > tbody > tr > td:nth-child(12) > a')
+    last_page = driver.find_element(By.CSS_SELECTOR, '#pages > table > tbody > tr > td:nth-child(13) > a')
+
+    # Проверка, что следующая страница не является последней
+    while next_page.get_attribute('href') != last_page.get_attribute('href'):
+        get_links_by_page()
+        print('Готовимся к переходу на след страницу')
+        next_page.click()
+        print('Перешли на след страницу')
+        time.sleep(1)
+        next_page = driver.find_element(By.CSS_SELECTOR, '#pages > table > tbody > tr > td:nth-child(12) > a')
+        last_page = driver.find_element(By.CSS_SELECTOR, '#pages > table > tbody > tr > td:nth-child(13) > a')
+    # Получаем ссылки с последней страницы
     get_links_by_page()
+    print('Ссылки собраны успешно...')
     print(profile_links)
     print(len(profile_links))
+
+
+get_all_links(True)
